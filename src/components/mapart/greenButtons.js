@@ -7,25 +7,23 @@ import Tooltip from "../tooltip";
 import MapModes from "./json/mapModes.json";
 import WhereSupportBlocksModes from "./json/whereSupportBlocksModes.json";
 
-import NBTWorker from "./workers/nbt.jsworker";
+
 
 import "./greenButtons.css";
 
 class GreenButtons extends Component {
   // For download buttons and donate link etc
   state = {
-    buttonWidth_viewOnline: 1,
     buttonWidth_NBT_Joined: 1,
     buttonWidth_NBT_Split: 1,
     buttonWidth_Mapdat_Split: 1,
     mapPreviewWorker_onFinishCallback: null,
   };
 
-  nbtWorker = new Worker(NBTWorker);
+  nbtWorker = new Worker(new URL("./workers/nbt.worker.js", import.meta.url));
 
   resetButtonWidths() {
     this.setState({
-      buttonWidth_viewOnline: 1,
       buttonWidth_NBT_Joined: 1,
       buttonWidth_NBT_Split: 1,
       buttonWidth_Mapdat_Split: 1,
@@ -63,7 +61,7 @@ class GreenButtons extends Component {
     let numberOfSplitsCalculated = 0;
     let zipFile = new JSZip();
     const t0 = performance.now();
-    this.nbtWorker = new Worker(NBTWorker);
+    this.nbtWorker = new Worker(new URL("./workers/nbt.worker.js", import.meta.url));
     this.nbtWorker.onmessage = (e) => {
       switch (e.data.head) {
         case "PROGRESS_REPORT_CREATE_NBT_JOINED_FOR_VIEW_ONLINE": {
@@ -161,9 +159,7 @@ class GreenButtons extends Component {
     });
   };
 
-  onViewOnlineClicked = () => {
-    this.getNBT_base("CREATE_NBT_JOINED_FOR_VIEW_ONLINE");
-  };
+
 
   onGetNBTClicked = () => {
     this.getNBT_base("CREATE_NBT_JOINED");
@@ -256,26 +252,14 @@ class GreenButtons extends Component {
   }
 
   render() {
-    const { buttonWidth_viewOnline, buttonWidth_NBT_Joined, buttonWidth_NBT_Split, buttonWidth_Mapdat_Split } = this.state;
+    const { buttonWidth_NBT_Joined, buttonWidth_NBT_Split, buttonWidth_Mapdat_Split } = this.state;
     const { getLocaleString, optionValue_modeNBTOrMapdat } = this.props;
     let buttons_mapModeConditional;
     // dummy text used in divs with absolutely positioned children to create correct container height
     if (optionValue_modeNBTOrMapdat === MapModes.SCHEMATIC_NBT.uniqueId) {
       buttons_mapModeConditional = (
         <React.Fragment>
-          <Tooltip tooltipText={getLocaleString("VIEW-ONLINE/TITLE-TT")}>
-            <div className="greenButton" onClick={this.onViewOnlineClicked}>
-              <span className="greenButton_text_dummy">{getLocaleString("VIEW-ONLINE/TITLE")}</span>
-              <span className="greenButton_text">{getLocaleString("VIEW-ONLINE/TITLE")}</span>
-              <div
-                className="greenButton_progressDiv"
-                style={{
-                  width: `${Math.floor(buttonWidth_viewOnline * 100)}%`,
-                }}
-              />
-            </div>
-          </Tooltip>
-          <br />
+
           <Tooltip tooltipText={getLocaleString("DOWNLOAD/NBT-SPECIFIC/DOWNLOAD-TT")}>
             <div className="greenButton" onClick={this.onGetNBTClicked}>
               <span className="greenButton_large_text_dummy">{getLocaleString("DOWNLOAD/NBT-SPECIFIC/DOWNLOAD")}</span>

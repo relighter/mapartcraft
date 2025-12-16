@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import Tooltip from "../tooltip";
-import BlockSelectionAddCustom from "./blockSelectionAddCustom/blockSelectionAddCustom";
+
 import BlockImage from "./blockImage";
 
 import MapModes from "./json/mapModes.json";
@@ -10,9 +10,7 @@ import SupportedVersions from "./json/supportedVersions.json";
 import "./blockSelection.css";
 
 class BlockSelection extends Component {
-  state = {
-    lastSelectedCustomBlock: null, // {colourSetId, blockId}
-  };
+  state = {};
 
   cssRGB(RGBArray) {
     // RGB array to css compatible string
@@ -23,6 +21,7 @@ class BlockSelection extends Component {
     const { optionValue_staircasing } = this.props;
     let background;
     switch (optionValue_staircasing) {
+      case null:
       case MapModes.SCHEMATIC_NBT.staircaseModes.OFF.uniqueId:
       case MapModes.MAPDAT.staircaseModes.OFF.uniqueId: {
         background = this.cssRGB(colourSet.tonesRGB.normal);
@@ -77,55 +76,12 @@ class BlockSelection extends Component {
       onChangeColourSetBlock,
       optionValue_version,
       selectedBlocks,
-      presets,
-      selectedPresetName,
-      canDeletePreset,
-      onPresetChange,
-      onDeletePreset,
-      onSavePreset,
-      onSharePreset,
-      onGetPDNPaletteClicked,
-      handleAddCustomBlock,
-      handleDeleteCustomBlock,
     } = this.props;
-    const { lastSelectedCustomBlock } = this.state;
-    const presetsManagement = (
-      <React.Fragment>
-        <h2 id="blockselectiontitle">{getLocaleString("BLOCK-SELECTION/TITLE")}</h2>
-        <b>
-          {getLocaleString("BLOCK-SELECTION/PRESETS/TITLE")}
-          {":"}
-        </b>{" "}
-        <select id="presets" value={selectedPresetName} onChange={onPresetChange}>
-          <option value="None">{getLocaleString("BLOCK-SELECTION/PRESETS/NONE")}</option>
-          {presets.map((preset) => (
-            <option value={preset.name} key={preset.name}>
-              {"localeKey" in preset ? getLocaleString(preset.localeKey) : preset.name}
-            </option>
-          ))}
-        </select>
-        <button type="button" disabled={!canDeletePreset()} onClick={onDeletePreset}>
-          {getLocaleString("BLOCK-SELECTION/PRESETS/DELETE")}
-        </button>
-        <button type="button" onClick={onSavePreset}>
-          {getLocaleString("BLOCK-SELECTION/PRESETS/SAVE")}
-        </button>
-        <Tooltip tooltipText={getLocaleString("BLOCK-SELECTION/PRESETS/SHARE-TT")}>
-          <button type="button" onClick={onSharePreset}>
-            {getLocaleString("BLOCK-SELECTION/PRESETS/SHARE")}
-          </button>
-        </Tooltip>
-        <Tooltip tooltipText={getLocaleString("BLOCK-SELECTION/PRESETS/DOWNLOAD-TT")}>
-          <button type="button" onClick={onGetPDNPaletteClicked}>
-            {getLocaleString("BLOCK-SELECTION/PRESETS/DOWNLOAD")}
-          </button>
-        </Tooltip>
-      </React.Fragment>
-    );
+
     const blockSelection = (
       <React.Fragment>
         {Object.entries(coloursJSON)
-          .filter(([, colourSet]) => Object.values(colourSet.blocks).some((block) => Object.keys(block.validVersions).includes(optionValue_version.MCVersion)))
+          .filter(([, colourSet]) => Object.values(colourSet.blocks).some((block) => Object.keys(block.validVersions).includes(optionValue_version.MCVersion) && block.displayName.includes("Carpet")))
           .map(([colourSetId, colourSet]) => (
             <div key={colourSetId} className="colourSet">
               {this.getColourSetBox(colourSet)}
@@ -149,7 +105,7 @@ class BlockSelection extends Component {
               </label>
               <div className={"colourSetBlocks"}>
                 {Object.entries(colourSet.blocks)
-                  .filter(([, block]) => Object.keys(block.validVersions).includes(optionValue_version.MCVersion))
+                  .filter(([, block]) => Object.keys(block.validVersions).includes(optionValue_version.MCVersion) && block.displayName.includes("Carpet"))
                   .map(([blockId, block]) => (
                     <label key={blockId}>
                       <Tooltip tooltipText={block.displayName}>
@@ -164,9 +120,8 @@ class BlockSelection extends Component {
                               }}
                             >
                               <Tooltip
-                                tooltipText={`${getLocaleString("BLOCK-SELECTION/UNSUPPORTED-PAST")} ${
-                                  Object.keys(block.validVersions)[Object.keys(block.validVersions).length - 1]
-                                }`}
+                                tooltipText={`${getLocaleString("BLOCK-SELECTION/UNSUPPORTED-PAST")} ${Object.keys(block.validVersions)[Object.keys(block.validVersions).length - 1]
+                                  }`}
                                 textStyleOverrides={{
                                   whiteSpace: "nowrap",
                                   backgroundColor: "red",
@@ -182,9 +137,6 @@ class BlockSelection extends Component {
                           blockId={blockId}
                           onClick={() => {
                             onChangeColourSetBlock(colourSetId, blockId);
-                            if (block.presetIndex === "CUSTOM") {
-                              this.setState({ lastSelectedCustomBlock: { colourSetId, blockId } });
-                            }
                           }}
                           style={{
                             cursor: "pointer",
@@ -206,15 +158,7 @@ class BlockSelection extends Component {
     );
     return (
       <div className="section blockSelectionDiv">
-        {presetsManagement}
         {blockSelection}
-        <BlockSelectionAddCustom
-          getLocaleString={getLocaleString}
-          coloursJSON={coloursJSON}
-          onAddCustomBlock={handleAddCustomBlock}
-          onDeleteCustomBlock={handleDeleteCustomBlock}
-          lastSelectedCustomBlock={lastSelectedCustomBlock}
-        />
       </div>
     );
   }

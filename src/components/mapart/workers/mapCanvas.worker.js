@@ -143,9 +143,9 @@ function setupColourSetsToUse() {
   });
 
   // now get appropriate shades
-  const toneKeys = Object.values(Object.values(MapModes).find((mapMode) => mapMode.uniqueId === optionValue_modeNBTOrMapdat).staircaseModes).find(
-    (staircaseMode) => staircaseMode.uniqueId === optionValue_staircasing
-  ).toneKeys;
+  const staircaseModes = Object.values(MapModes).find((mapMode) => mapMode.uniqueId === optionValue_modeNBTOrMapdat).staircaseModes;
+  const staircaseMode = Object.values(staircaseModes).find((mode) => mode.uniqueId === optionValue_staircasing) || staircaseModes.OFF;
+  const toneKeys = staircaseMode.toneKeys;
 
   for (const colourSetId of colourSetIdsToUse) {
     let tonesRGB = {};
@@ -561,6 +561,9 @@ function getMapartImageDataAndMaterials() {
 }
 
 onmessage = (e) => {
+  if (!e.data || e.data.head !== "PIXELS") {
+    return;
+  }
   coloursJSON = e.data.body.coloursJSON;
   MapModes = e.data.body.MapModes;
   WhereSupportBlocksModes = e.data.body.WhereSupportBlocksModes;

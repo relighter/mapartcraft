@@ -1,3 +1,4 @@
+
 import React, { Component } from "react";
 
 import CookieManager from "../../cookieManager";
@@ -7,8 +8,7 @@ import MapPreview from "./mapPreview";
 import MapSettings from "./mapSettings";
 import Materials from "./materials";
 import coloursJSON from "./json/coloursJSON.json";
-import ViewOnline2D from "./viewOnline2D/viewOnline2D";
-import ViewOnline3D from "./viewOnline3D/viewOnline3D";
+
 
 import BackgroundColourModes from "./json/backgroundColourModes.json";
 import CropModes from "./json/cropModes.json";
@@ -35,9 +35,9 @@ class MapartController extends Component {
     optionValue_cropImage_percent_x: 50,
     optionValue_cropImage_percent_y: 50,
     optionValue_showGridOverlay: false,
-    optionValue_staircasing: MapModes.SCHEMATIC_NBT.staircaseModes.VALLEY.uniqueId,
-    optionValue_whereSupportBlocks: WhereSupportBlocksModes.ALL_OPTIMIZED.uniqueId,
-    optionValue_supportBlock: "cobblestone",
+    optionValue_staircasing: null,
+    optionValue_whereSupportBlocks: WhereSupportBlocksModes.NONE.uniqueId,
+    optionValue_supportBlock: "white_carpet",
     optionValue_transparency: false,
     optionValue_transparencyTolerance: 128,
     optionValue_mapdatFilenameUseId: true,
@@ -50,7 +50,7 @@ class MapartController extends Component {
     preProcessingValue_saturation: 100,
     preProcessingValue_backgroundColourSelect: BackgroundColourModes.OFF.uniqueId,
     preProcessingValue_backgroundColour: "#151515",
-    optionValue_extras_moreStaircasingOptions: false,
+
     uploadedImage: null,
     uploadedImage_baseFilename: null,
     presets: [],
@@ -61,8 +61,7 @@ class MapartController extends Component {
       currentSelectedBlocks: {}, // we keep this soley for materials.js
     },
     mapPreviewWorker_inProgress: false,
-    viewOnline_NBT: null,
-    viewOnline_3D: false,
+
   };
 
   constructor(props) {
@@ -217,11 +216,6 @@ class MapartController extends Component {
   onOptionChange_modeNBTOrMapdat = (e) => {
     const mode = parseInt(e.target.value);
     this.setState({ optionValue_modeNBTOrMapdat: mode });
-    if (mode === MapModes.SCHEMATIC_NBT.uniqueId) {
-      this.setState({ optionValue_staircasing: MapModes.SCHEMATIC_NBT.staircaseModes.VALLEY.uniqueId });
-    } else {
-      this.setState({ optionValue_staircasing: MapModes.MAPDAT.staircaseModes.ON_UNOBTAINABLE.uniqueId });
-    }
   };
 
   onOptionChange_version = (e) => {
@@ -240,17 +234,7 @@ class MapartController extends Component {
     });
   };
 
-  onOptionChange_mapSize_x = (value) => {
-    this.setState({
-      optionValue_mapSize_x: value,
-    });
-  };
 
-  onOptionChange_mapSize_y = (value) => {
-    this.setState({
-      optionValue_mapSize_y: value,
-    });
-  };
 
   onOptionChange_cropImage = (e) => {
     const cropValue = parseInt(e.target.value);
@@ -282,17 +266,9 @@ class MapartController extends Component {
     });
   };
 
-  onOptionChange_showGridOverlay = () => {
-    this.setState({
-      optionValue_showGridOverlay: !this.state.optionValue_showGridOverlay,
-    });
-    // "updatePreviewScale(0)"
-  };
 
-  onOptionChange_staircasing = (e) => {
-    const staircasingValue = parseInt(e.target.value);
-    this.setState({ optionValue_staircasing: staircasingValue });
-  };
+
+
 
   onOptionChange_transparency = () => {
     this.setState({
@@ -331,14 +307,7 @@ class MapartController extends Component {
     this.setState({ optionValue_dithering: ditheringValue });
   };
 
-  onOptionChange_WhereSupportBlocks = (e) => {
-    const newValue = parseInt(e.target.value);
-    this.setState({ optionValue_whereSupportBlocks: newValue });
-  };
 
-  setOption_SupportBlock = (text) => {
-    this.setState({ optionValue_supportBlock: text });
-  };
 
   onOptionChange_PreProcessingEnabled = () => {
     this.setState({
@@ -374,21 +343,9 @@ class MapartController extends Component {
     this.setState({ preProcessingValue_backgroundColour: newValue });
   };
 
-  onOptionChange_extras_moreStaircasingOptions = () => {
-    const { optionValue_modeNBTOrMapdat, optionValue_extras_moreStaircasingOptions } = this.state;
-    this.setState({ optionValue_extras_moreStaircasingOptions: !optionValue_extras_moreStaircasingOptions });
-    if (optionValue_extras_moreStaircasingOptions) {
-      if (optionValue_modeNBTOrMapdat === MapModes.SCHEMATIC_NBT.uniqueId) {
-        this.setState({ optionValue_staircasing: MapModes.SCHEMATIC_NBT.staircaseModes.VALLEY.uniqueId });
-      } else {
-        this.setState({ optionValue_staircasing: MapModes.MAPDAT.staircaseModes.ON_UNOBTAINABLE.uniqueId });
-      }
-    }
-  };
 
-  onGetViewOnlineNBT = (viewOnline_NBT) => {
-    this.setState({ viewOnline_NBT });
-  };
+
+
 
   downloadBlobFile(downloadBlob, filename) {
     const downloadURL = window.URL.createObjectURL(downloadBlob);
@@ -411,23 +368,10 @@ class MapartController extends Component {
       (Object.entries(selectedBlocks).some(([colourSetId, blockId]) => blockId !== "-1" && coloursJSON[colourSetId].blocks[blockId].presetIndex === "CUSTOM")
         ? "\n; Custom blocks not listed!"
         : "") +
-      "\n; staircasing: " +
-      ([
-        MapModes.SCHEMATIC_NBT.staircaseModes.CLASSIC.uniqueId,
-        MapModes.SCHEMATIC_NBT.staircaseModes.VALLEY.uniqueId,
-        MapModes.MAPDAT.staircaseModes.ON.uniqueId,
-        MapModes.MAPDAT.staircaseModes.ON_UNOBTAINABLE.uniqueId,
-      ].includes(optionValue_staircasing)
-        ? "enabled"
-        : "disabled") +
-      "\n; unobtainable colours: " +
-      ([MapModes.MAPDAT.staircaseModes.ON_UNOBTAINABLE.uniqueId, MapModes.MAPDAT.staircaseModes.FULL_UNOBTAINABLE.uniqueId].includes(optionValue_staircasing)
-        ? "enabled"
-        : "disabled") +
       "\n";
     let numberOfColoursExported = 0;
     const toneKeysToExport = Object.values(Object.values(MapModes).find((mapMode) => mapMode.uniqueId === optionValue_modeNBTOrMapdat).staircaseModes).find(
-      (staircaseMode) => staircaseMode.uniqueId === optionValue_staircasing
+      (staircaseMode) => staircaseMode.uniqueId === (optionValue_staircasing || MapModes.SCHEMATIC_NBT.staircaseModes.NONE.uniqueId)
     ).toneKeys; // this .find stuff is annoying.
     // TODO change from uniqueId to key
     for (const [selectedBlock_colourSetId, selectedBlock_blockId] of Object.entries(selectedBlocks)) {
@@ -450,7 +394,8 @@ class MapartController extends Component {
       alert(
         `${getLocaleString("BLOCK-SELECTION/PRESETS/DOWNLOAD-WARNING-MAX-COLOURS-1")}${numberOfColoursExported.toString()}${getLocaleString(
           "BLOCK-SELECTION/PRESETS/DOWNLOAD-WARNING-MAX-COLOURS-2"
-        )}`
+        )
+        } `
       );
     }
     const downloadBlob = new Blob([paletteText], { type: "text/plain" });
@@ -482,7 +427,7 @@ class MapartController extends Component {
     const { getLocaleString } = this.props;
     const { presets, selectedPresetName } = this.state;
     if (!this.canDeletePreset()) return;
-    if (!window.confirm(`${getLocaleString("BLOCK-SELECTION/PRESETS/DELETE-CONFIRM")} ${selectedPresetName}`)) return;
+    if (!window.confirm(`${getLocaleString("BLOCK-SELECTION/PRESETS/DELETE-CONFIRM")} ${selectedPresetName} `)) return;
     const presets_new = presets.filter((preset) => preset.name !== selectedPresetName);
     this.setState({
       presets: presets_new,
@@ -568,9 +513,11 @@ class MapartController extends Component {
         window.location.replace("https://www.youtube.com/watch?v=cZ5wOPinZd4");
         return null;
       case "mares":
-        document.body.style.backgroundSize="100%";
-        fetch("https://derpibooru.org/api/v1/json/search/images?q=scenery,score.gte:1000,safe&sf=random&per_page=1").then(req=>req.json()).then(derp=>document.body.style.backgroundImage=`url(${derp.images[0].representations.full})`);
+        document.body.style.backgroundSize = "100%";
+        fetch("https://derpibooru.org/api/v1/json/search/images?q=scenery,score.gte:1000,safe&sf=random&per_page=1").then(req => req.json()).then(derp => document.body.style.backgroundImage = `url(${derp.images[0].representations.full})`);
         return null;
+      default:
+        break;
     }
     if (!/^[0-9a-zQ-ZA-P]*$/g.test(encodedPreset)) {
       onCorruptedPreset();
@@ -625,16 +572,9 @@ class MapartController extends Component {
     this.setState({ currentMaterialsData: currentMaterialsData, mapPreviewWorker_inProgress: false });
   };
 
-  onChooseViewOnline3D = () => {
-    this.setState({ viewOnline_3D: true });
-  };
 
-  handleViewOnline3DEscape = () => {
-    this.setState({
-      viewOnline_NBT: null,
-      viewOnline_3D: false,
-    });
-  };
+
+
 
   handleAddCustomBlock = (block_colourSetId, block_name, block_nbtTags, block_versions, block_needsSupport, block_flammable) => {
     const { getLocaleString } = this.props;
@@ -661,7 +601,7 @@ class MapartController extends Component {
         continue;
       }
       if (addedFirstVersion) {
-        blockToAdd.validVersions[SupportedVersions[block_version].MCVersion] = `&${Object.keys(blockToAdd.validVersions)[0]}`;
+        blockToAdd.validVersions[SupportedVersions[block_version].MCVersion] = `& ${Object.keys(blockToAdd.validVersions)[0]} `;
       } else {
         blockToAdd.validVersions[SupportedVersions[block_version].MCVersion] = {
           NBTName: block_name_trimmed,
@@ -764,15 +704,14 @@ class MapartController extends Component {
       preProcessingValue_saturation,
       preProcessingValue_backgroundColourSelect,
       preProcessingValue_backgroundColour,
-      optionValue_extras_moreStaircasingOptions,
+
       uploadedImage,
       uploadedImage_baseFilename,
       presets,
       selectedPresetName,
       currentMaterialsData,
       mapPreviewWorker_inProgress,
-      viewOnline_NBT,
-      viewOnline_3D,
+
     } = this.state;
     return (
       <div className="mapartController">
@@ -834,26 +773,7 @@ class MapartController extends Component {
               onOptionChange_version={this.onOptionChange_version}
               optionValue_modeNBTOrMapdat={optionValue_modeNBTOrMapdat}
               onOptionChange_modeNBTOrMapdat={this.onOptionChange_modeNBTOrMapdat}
-              optionValue_mapSize_x={optionValue_mapSize_x}
-              onOptionChange_mapSize_x={this.onOptionChange_mapSize_x}
-              optionValue_mapSize_y={optionValue_mapSize_y}
-              onOptionChange_mapSize_y={this.onOptionChange_mapSize_y}
-              optionValue_cropImage={optionValue_cropImage}
-              onOptionChange_cropImage={this.onOptionChange_cropImage}
-              optionValue_cropImage_zoom={optionValue_cropImage_zoom}
-              onOptionChange_cropImage_zoom={this.onOptionChange_cropImage_zoom}
-              optionValue_cropImage_percent_x={optionValue_cropImage_percent_x}
-              onOptionChange_cropImage_percent_x={this.onOptionChange_cropImage_percent_x}
-              optionValue_cropImage_percent_y={optionValue_cropImage_percent_y}
-              onOptionChange_cropImage_percent_y={this.onOptionChange_cropImage_percent_y}
-              optionValue_showGridOverlay={optionValue_showGridOverlay}
-              onOptionChange_showGridOverlay={this.onOptionChange_showGridOverlay}
-              optionValue_staircasing={optionValue_staircasing}
-              onOptionChange_staircasing={this.onOptionChange_staircasing}
-              optionValue_whereSupportBlocks={optionValue_whereSupportBlocks}
-              onOptionChange_WhereSupportBlocks={this.onOptionChange_WhereSupportBlocks}
-              optionValue_supportBlock={optionValue_supportBlock}
-              setOption_SupportBlock={this.setOption_SupportBlock}
+
               optionValue_transparency={optionValue_transparency}
               onOptionChange_transparency={this.onOptionChange_transparency}
               optionValue_transparencyTolerance={optionValue_transparencyTolerance}
@@ -878,8 +798,7 @@ class MapartController extends Component {
               onOptionChange_PreProcessingBackgroundColourSelect={this.onOptionChange_PreProcessingBackgroundColourSelect}
               preProcessingValue_backgroundColour={preProcessingValue_backgroundColour}
               onOptionChange_PreProcessingBackgroundColour={this.onOptionChange_PreProcessingBackgroundColour}
-              optionValue_extras_moreStaircasingOptions={optionValue_extras_moreStaircasingOptions}
-              onOptionChange_extras_moreStaircasingOptions={this.onOptionChange_extras_moreStaircasingOptions}
+
             />
             <GreenButtons
               getLocaleString={getLocaleString}
@@ -926,30 +845,7 @@ class MapartController extends Component {
             />
           ) : null}
         </div>
-        {viewOnline_NBT !== null &&
-          (viewOnline_3D ? (
-            <ViewOnline3D
-              getLocaleString={getLocaleString}
-              coloursJSON={coloursJSON}
-              optionValue_version={optionValue_version}
-              optionValue_mapSize_x={optionValue_mapSize_x}
-              optionValue_mapSize_y={optionValue_mapSize_y}
-              viewOnline_NBT={viewOnline_NBT}
-              handleViewOnline3DEscape={this.handleViewOnline3DEscape}
-            />
-          ) : (
-            <ViewOnline2D
-              getLocaleString={getLocaleString}
-              coloursJSON={coloursJSON}
-              optionValue_version={optionValue_version}
-              optionValue_mapSize_x={optionValue_mapSize_x}
-              optionValue_mapSize_y={optionValue_mapSize_y}
-              optionValue_staircasing={optionValue_staircasing}
-              viewOnline_NBT={viewOnline_NBT}
-              onGetViewOnlineNBT={this.onGetViewOnlineNBT}
-              onChooseViewOnline3D={this.onChooseViewOnline3D}
-            />
-          ))}
+
       </div>
     );
   }

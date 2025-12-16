@@ -362,6 +362,7 @@ class Map_NBT {
     let physicalColumn = [];
     let currentHeight;
     switch (optionValue_staircasing) {
+      case null:
       case MapModes.SCHEMATIC_NBT.staircaseModes.OFF.uniqueId: {
         // start at y = 2 for flat maps; this covers the cases of support blocks 1 and or 2 blocks below
         currentHeight = 2;
@@ -613,6 +614,7 @@ class Map_NBT {
         });
         break;
       }
+      case null:
       case MapModes.SCHEMATIC_NBT.staircaseModes.OFF.uniqueId:
       case MapModes.SCHEMATIC_NBT.staircaseModes.FULL_DARK.uniqueId:
       case MapModes.SCHEMATIC_NBT.staircaseModes.FULL_LIGHT.uniqueId: {
@@ -821,6 +823,9 @@ function setupColoursLayoutsFromPixelsData() {
 }
 
 onmessage = (e) => {
+  if (!e.data || !e.data.body) {
+    return;
+  }
   coloursJSON = e.data.body.coloursJSON;
   MapModes = e.data.body.MapModes;
   WhereSupportBlocksModes = e.data.body.WhereSupportBlocksModes;

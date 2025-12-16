@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 
 import Header from "./header";
-import Languages from "./languages";
 import MapartController from "./mapart/mapartController";
 
 import Locale from "../locale/locale";
@@ -24,8 +23,8 @@ class Root extends Component {
   }
 
   getLocaleString = (stringName, languageCodeOverride) => {
-    // languageCodeOverride only used inside this method for falling back to en
-    const countryCode = languageCodeOverride !== undefined ? languageCodeOverride : this.props.match.params.countryCode;
+    // Always use 'en'
+    const countryCode = "en";
     if (countryCode in Locale) {
       let stringSegments = stringName.split("/");
       const stringLast = stringSegments.pop();
@@ -34,8 +33,6 @@ class Root extends Component {
         folder = folder[stringSegment];
       }
       if (folder[stringLast] === null) {
-        // this could get stuck in an endless loop if the string does not exist in en;
-        // en must always exist
         return this.getLocaleString(stringName, "en");
       } else {
         return folder[stringLast];
@@ -62,10 +59,9 @@ class Root extends Component {
     return (
       <React.Fragment>
         <div className="titleAndLanguages">
-          <span><h1>MapartCraft</h1>{this.props.match.params.countryCode && this.props.match.params.countryCode !== "en" && <small>{this.getLocaleString("TRANSLATION/CREDITS")}</small>}</span>
-          <Languages />
+          <span><h1>MapartCraft</h1></span>
         </div>
-        <Header getLocaleString={this.getLocaleString} countryCode={this.props.match.params.countryCode} />
+        <Header getLocaleString={this.getLocaleString} countryCode={"en"} />
         <MapartController getLocaleString={this.getLocaleString} onCorruptedPreset={this.showCorruptedPresetWarning} />
         <div className="fixedMessages">
           {displayingEdgeWarning ? (

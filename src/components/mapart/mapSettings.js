@@ -1,17 +1,15 @@
 import React, { Component } from "react";
 
-import AutoCompleteInputBlockToAdd from "./autoCompleteInputBlockToAdd/autoCompleteInputBlockToAdd";
+
 
 import BufferedNumberInput from "./bufferedNumberInput/bufferedNumberInput";
 
 import Tooltip from "../tooltip";
 
 import BackgroundColourModes from "./json/backgroundColourModes.json";
-import CropModes from "./json/cropModes.json";
 import DitherMethods from "./json/ditherMethods.json";
 import MapModes from "./json/mapModes.json";
 import SupportedVersions from "./json/supportedVersions.json";
-import WhereSupportBlocksModes from "./json/whereSupportBlocksModes.json";
 
 import "./mapSettings.css";
 
@@ -19,39 +17,10 @@ class MapSettings extends Component {
   render() {
     const {
       getLocaleString,
-      coloursJSON,
       optionValue_version,
       onOptionChange_version,
-      optionValue_mapSize_x,
-      onOptionChange_mapSize_x,
-      optionValue_mapSize_y,
-      onOptionChange_mapSize_y,
       optionValue_modeNBTOrMapdat,
       onOptionChange_modeNBTOrMapdat,
-      optionValue_cropImage,
-      onOptionChange_cropImage,
-      optionValue_cropImage_zoom,
-      onOptionChange_cropImage_zoom,
-      optionValue_cropImage_percent_x,
-      onOptionChange_cropImage_percent_x,
-      optionValue_cropImage_percent_y,
-      onOptionChange_cropImage_percent_y,
-      optionValue_showGridOverlay,
-      onOptionChange_showGridOverlay,
-      optionValue_staircasing,
-      onOptionChange_staircasing,
-      optionValue_whereSupportBlocks,
-      onOptionChange_WhereSupportBlocks,
-      optionValue_supportBlock,
-      setOption_SupportBlock,
-      optionValue_transparency,
-      onOptionChange_transparency,
-      optionValue_transparencyTolerance,
-      onOptionChange_transparencyTolerance,
-      optionValue_mapdatFilenameUseId,
-      onOptionChange_mapdatFilenameUseId,
-      optionValue_mapdatFilenameIdStart,
-      onOptionChange_mapdatFilenameIdStart,
       optionValue_betterColour,
       onOptionChange_BetterColour,
       optionValue_dithering,
@@ -68,8 +37,6 @@ class MapSettings extends Component {
       onOptionChange_PreProcessingBackgroundColourSelect,
       preProcessingValue_backgroundColour,
       onOptionChange_PreProcessingBackgroundColour,
-      optionValue_extras_moreStaircasingOptions,
-      onOptionChange_extras_moreStaircasingOptions,
     } = this.props;
     const setting_mode = (
       <React.Fragment>
@@ -107,337 +74,7 @@ class MapSettings extends Component {
         <br />
       </React.Fragment>
     );
-    const setting_mapSize = (
-      <React.Fragment>
-        <b>
-          {getLocaleString("MAP-SETTINGS/MAP-SIZE")}
-          {":"}
-        </b>{" "}
-        <BufferedNumberInput
-          min="1"
-          max={null}
-          step="1"
-          value={optionValue_mapSize_x}
-          validators={[(t) => !isNaN(t), (t) => t > 0]}
-          onValidInput={onOptionChange_mapSize_x}
-          style={{ width: "2em" }}
-        />
-        x
-        <BufferedNumberInput
-          min="1"
-          max={null}
-          step="1"
-          value={optionValue_mapSize_y}
-          validators={[(t) => !isNaN(t), (t) => t > 0]}
-          onValidInput={onOptionChange_mapSize_y}
-          style={{ width: "2em" }}
-        />
-        <br />
-      </React.Fragment>
-    );
-    let setting_crop = (
-      <tr>
-        <th>
-          <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/CROP/TITLE-TT")}>
-            <b>
-              {getLocaleString("MAP-SETTINGS/CROP/TITLE")}
-              {":"}
-            </b>
-          </Tooltip>{" "}
-        </th>
-        <td>
-          <select onChange={onOptionChange_cropImage} value={optionValue_cropImage}>
-            {Object.values(CropModes).map((cropMode) => (
-              <option key={cropMode.uniqueId} value={cropMode.uniqueId}>
-                {getLocaleString(cropMode.localeKey)}
-              </option>
-            ))}
-          </select>
-        </td>
-        <td />
-      </tr>
-    );
-    let setting_crop_zoom = null;
-    let setting_crop_percent_x = null;
-    let setting_crop_percent_y = null;
-    if (optionValue_cropImage === CropModes.MANUAL.uniqueId) {
-      setting_crop_zoom = (
-        <tr>
-          <th>
-            <b>
-              {getLocaleString("MAP-SETTINGS/CROP/ZOOM")}
-              {":"}
-            </b>{" "}
-          </th>
-          <td>
-            <input
-              type="range"
-              min="10"
-              max="50"
-              value={optionValue_cropImage_zoom}
-              onChange={(e) => onOptionChange_cropImage_zoom(parseInt(e.target.value))}
-            />
-          </td>
-          <td />
-        </tr>
-      );
-      setting_crop_percent_x = (
-        <tr>
-          <th>
-            <b>{"X:"}</b>{" "}
-          </th>
-          <td>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={optionValue_cropImage_percent_x}
-              onChange={(e) => onOptionChange_cropImage_percent_x(parseInt(e.target.value))}
-            />
-          </td>
-          <td>
-            <BufferedNumberInput
-              min="0"
-              max="100"
-              step="1"
-              value={optionValue_cropImage_percent_x}
-              validators={[(t) => !isNaN(t), (t) => t >= 0, (t) => t <= 100]}
-              onValidInput={onOptionChange_cropImage_percent_x}
-              style={{ width: "3em" }}
-            />
-          </td>
-        </tr>
-      );
-      setting_crop_percent_y = (
-        <tr>
-          <th>
-            <b>{"Y:"}</b>{" "}
-          </th>
-          <td>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={optionValue_cropImage_percent_y}
-              onChange={(e) => onOptionChange_cropImage_percent_y(parseInt(e.target.value))}
-            />
-          </td>
-          <td>
-            <BufferedNumberInput
-              min="0"
-              max="100"
-              step="1"
-              value={optionValue_cropImage_percent_y}
-              validators={[(t) => !isNaN(t), (t) => t >= 0, (t) => t <= 100]}
-              onValidInput={onOptionChange_cropImage_percent_y}
-              style={{ width: "3em" }}
-            />
-          </td>
-        </tr>
-      );
-    }
-    let settingGroup_cropping = (
-      <div className={optionValue_cropImage === CropModes.MANUAL.uniqueId ? "settingsGroup" : null}>
-        <table>
-          <tbody>
-            {setting_crop}
-            {setting_crop_zoom}
-            {setting_crop_percent_x}
-            {setting_crop_percent_y}
-          </tbody>
-        </table>
-      </div>
-    );
-    const setting_grid = (
-      <React.Fragment>
-        <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/GRID-OVERLAY-TT")}>
-          <b>
-            {getLocaleString("MAP-SETTINGS/GRID-OVERLAY")}
-            {":"}
-          </b>
-        </Tooltip>{" "}
-        <input type="checkbox" checked={optionValue_showGridOverlay} onChange={onOptionChange_showGridOverlay} />
-        <br />
-      </React.Fragment>
-    );
-    const setting_staircasing = (
-      <React.Fragment>
-        <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/3D/TITLE-TT")}>
-          <b>
-            {getLocaleString("MAP-SETTINGS/3D/TITLE")}
-            {":"}
-          </b>
-        </Tooltip>{" "}
-        <select onChange={onOptionChange_staircasing} value={optionValue_staircasing}>
-          {Object.values(
-            optionValue_modeNBTOrMapdat === MapModes.SCHEMATIC_NBT.uniqueId ? MapModes.SCHEMATIC_NBT.staircaseModes : MapModes.MAPDAT.staircaseModes
-          )
-            .filter((staircaseMode) => optionValue_extras_moreStaircasingOptions || !staircaseMode.extra)
-            .map((staircaseMode) => (
-              <option key={staircaseMode.uniqueId} value={staircaseMode.uniqueId}>
-                {getLocaleString(staircaseMode.localeKey)}
-              </option>
-            ))}
-        </select>
-        <br />
-      </React.Fragment>
-    );
-    let settings_mapModeConditional;
-    if (optionValue_modeNBTOrMapdat === MapModes.SCHEMATIC_NBT.uniqueId) {
-      settings_mapModeConditional = (
-        <React.Fragment>
-          <b>
-            {getLocaleString("MAP-SETTINGS/NBT-SPECIFIC/WHERE-SUPPORT-BLOCKS/TITLE")}
-            {":"}
-          </b>{" "}
-          <select value={optionValue_whereSupportBlocks} onChange={onOptionChange_WhereSupportBlocks}>
-            {Object.values(WhereSupportBlocksModes).map((whereSupportBlocksMode) => (
-              <option key={whereSupportBlocksMode.uniqueId} value={whereSupportBlocksMode.uniqueId}>
-                {getLocaleString(whereSupportBlocksMode.localeKey)}
-              </option>
-            ))}
-          </select>
-          <br />
-          <b>
-            {getLocaleString("MAP-SETTINGS/NBT-SPECIFIC/SUPPORT-BLOCK-TO-ADD")}
-            {":"}
-          </b>{" "}
-          <AutoCompleteInputBlockToAdd
-            coloursJSON={coloursJSON}
-            value={optionValue_supportBlock}
-            setValue={setOption_SupportBlock}
-            optionValue_version={optionValue_version}
-          />
-          <br />
-        </React.Fragment>
-      );
-    } else {
-      let setting_transparency = (
-        <tr>
-          <th>
-            <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/MAPDAT-SPECIFIC/TRANSPARENCY-TT")}>
-              <b>
-                {getLocaleString("MAP-SETTINGS/MAPDAT-SPECIFIC/TRANSPARENCY")}
-                {":"}
-              </b>
-            </Tooltip>{" "}
-          </th>
-          <td>
-            <input type="checkbox" checked={optionValue_transparency} onChange={onOptionChange_transparency} />
-          </td>
-          <td />
-        </tr>
-      );
-      let setting_transparencyTolerance = null;
-      if (optionValue_transparency) {
-        setting_transparencyTolerance = (
-          <tr>
-            <th>
-              <b>
-                {getLocaleString("MAP-SETTINGS/MAPDAT-SPECIFIC/TRANSPARENCY-TOLERANCE")}
-                {":"}
-              </b>{" "}
-            </th>
-            <td>
-              <input
-                type="range"
-                min="0"
-                max="256"
-                value={optionValue_transparencyTolerance}
-                onChange={(e) => onOptionChange_transparencyTolerance(parseInt(e.target.value))}
-              />
-            </td>
-            <td>
-              <BufferedNumberInput
-                min="0"
-                max="256"
-                step="1"
-                value={optionValue_transparencyTolerance}
-                validators={[(t) => !isNaN(t), (t) => t >= 0, (t) => t <= 256]}
-                onValidInput={onOptionChange_transparencyTolerance}
-                style={{ width: "3em" }}
-              />
-            </td>
-          </tr>
-        );
-      }
-      let settingGroup_transparency = (
-        <div className={optionValue_transparency ? "settingsGroup" : null}>
-          <table>
-            <tbody>
-              {setting_transparency}
-              {setting_transparencyTolerance}
-            </tbody>
-          </table>
-        </div>
-      );
-      let setting_mapdatFilenameUseId = (
-        <tr>
-          <th>
-            <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/MAPDAT-SPECIFIC/MAPDAT-FILENAME-USE-ID-TT")}>
-              <b>
-                {getLocaleString("MAP-SETTINGS/MAPDAT-SPECIFIC/MAPDAT-FILENAME-USE-ID")}
-                {":"}
-              </b>
-            </Tooltip>{" "}
-          </th>
-          <td>
-            <input type="checkbox" checked={optionValue_mapdatFilenameUseId} onChange={onOptionChange_mapdatFilenameUseId} />
-          </td>
-          <td />
-          <td />
-        </tr>
-      );
-      let setting_mapdatFilenameIdStart = null;
-      if (optionValue_mapdatFilenameUseId) {
-        setting_mapdatFilenameIdStart = (
-          <tr>
-            <th>
-              <b>
-                {getLocaleString("MAP-SETTINGS/MAPDAT-SPECIFIC/MAPDAT-FILENAME-ID-RANGE")}
-                {":"}
-              </b>{" "}
-            </th>
-            <td>
-              <BufferedNumberInput
-                min="0"
-                step="1"
-                value={optionValue_mapdatFilenameIdStart}
-                validators={[(t) => !isNaN(t), (t) => t >= 0]}
-                onValidInput={onOptionChange_mapdatFilenameIdStart}
-                style={{ width: "3em" }}
-              />
-            </td>
-            <td>
-              <b>{"-"}</b>
-            </td>
-            <td>
-              <BufferedNumberInput
-                value={-1 + optionValue_mapdatFilenameIdStart + optionValue_mapSize_x * optionValue_mapSize_y}
-                disabled={true}
-                style={{ width: "3em" }}
-              />
-            </td>
-          </tr>
-        );
-      }
-      let settingGroup_mapdatFilename = (
-        <div className={optionValue_mapdatFilenameUseId ? "settingsGroup" : null}>
-          <table>
-            <tbody>
-              {setting_mapdatFilenameUseId}
-              {setting_mapdatFilenameIdStart}
-            </tbody>
-          </table>
-        </div>
-      );
-      settings_mapModeConditional = (
-        <React.Fragment>
-          {settingGroup_transparency}
-          {settingGroup_mapdatFilename}
-        </React.Fragment>
-      );
-    }
+
     const setting_betterColour = (
       <React.Fragment>
         <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/BETTER-COLOUR-TT")}>
@@ -641,45 +278,14 @@ class MapSettings extends Component {
         </details>
       </React.Fragment>
     );
-    const setting_extras_moreStaircasingOptions = (
-      <tr>
-        <th>
-          <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/EXTRAS/MORE-STAIRCASING-OPTIONS-TT")}>
-            <b>
-              {getLocaleString("MAP-SETTINGS/EXTRAS/MORE-STAIRCASING-OPTIONS")}
-              {":"}
-            </b>
-          </Tooltip>{" "}
-        </th>
-        <td>
-          <input type="checkbox" checked={optionValue_extras_moreStaircasingOptions} onChange={onOptionChange_extras_moreStaircasingOptions} />
-        </td>
-      </tr>
-    );
-    const settingGroup_extras = (
-      <React.Fragment>
-        <details>
-          <summary>{getLocaleString("MAP-SETTINGS/EXTRAS/TITLE")}</summary>
-          <table>
-            <tbody>{setting_extras_moreStaircasingOptions}</tbody>
-          </table>
-        </details>
-      </React.Fragment>
-    );
     const settingsDiv = (
       <div className="section settingsDiv">
         <h2>{getLocaleString("MAP-SETTINGS/TITLE")}</h2>
         {setting_mode}
         {setting_version}
-        {setting_mapSize}
-        {settingGroup_cropping}
-        {setting_grid}
-        {setting_staircasing}
-        {settings_mapModeConditional}
         {setting_betterColour}
         {setting_dithering}
         {settingGroup_preprocessing}
-        {settingGroup_extras}
       </div>
     );
     return settingsDiv;
