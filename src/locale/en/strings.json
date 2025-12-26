@@ -4,7 +4,7 @@
     "CREDITS": "Translated by: (Your Name Here)"
   },
   "HEAD-META-TAGS": {
-    "DESCRIPTION": "A Minecraft mapart schematic and map.dat generator"
+    "DESCRIPTION": "Submittion UI for MapCore 6b6t"
   },
   "FAQ": {
     "FAQ": "FAQ",
@@ -159,8 +159,8 @@
   "DOWNLOAD": {
     "ERROR-NONE-SELECTED": "Select blocks before downloading!",
     "NBT-SPECIFIC": {
-      "DOWNLOAD": "DOWNLOAD NBT",
-      "DOWNLOAD-TT": "Download the nbt",
+      "DOWNLOAD": "ADD TO QUEUE",
+      "DOWNLOAD-TT": "Add to the queue",
       "DOWNLOAD-SPLIT": "DOWNLOAD AS 1x1 SPLIT",
       "DOWNLOAD-SPLIT-TT": "Download the nbt split into 1x1 chunks"
     },

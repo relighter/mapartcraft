@@ -17,10 +17,6 @@ class MapSettings extends Component {
   render() {
     const {
       getLocaleString,
-      optionValue_version,
-      onOptionChange_version,
-      optionValue_modeNBTOrMapdat,
-      onOptionChange_modeNBTOrMapdat,
       optionValue_betterColour,
       onOptionChange_BetterColour,
       optionValue_dithering,
@@ -38,42 +34,6 @@ class MapSettings extends Component {
       preProcessingValue_backgroundColour,
       onOptionChange_PreProcessingBackgroundColour,
     } = this.props;
-    const setting_mode = (
-      <React.Fragment>
-        <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/MODE-TT")}>
-          <b>
-            {getLocaleString("MAP-SETTINGS/MODE")}
-            {":"}
-          </b>
-        </Tooltip>{" "}
-        <select onChange={onOptionChange_modeNBTOrMapdat} value={optionValue_modeNBTOrMapdat}>
-          {Object.values(MapModes).map((mapMode) => (
-            <option key={mapMode.uniqueId} value={mapMode.uniqueId}>
-              {mapMode.name}
-            </option>
-          ))}
-        </select>
-        <br />
-      </React.Fragment>
-    );
-    const setting_version = (
-      <React.Fragment>
-        <Tooltip tooltipText={getLocaleString("MAP-SETTINGS/VERSION-TT")}>
-          <b>
-            {getLocaleString("MAP-SETTINGS/VERSION")}
-            {":"}
-          </b>
-        </Tooltip>{" "}
-        <select value={optionValue_version.MCVersion} onChange={onOptionChange_version}>
-          {Object.values(SupportedVersions).map((supportedVersion) => (
-            <option key={supportedVersion.MCVersion} value={supportedVersion.MCVersion}>
-              {supportedVersion.MCVersion}
-            </option>
-          ))}
-        </select>
-        <br />
-      </React.Fragment>
-    );
 
     const setting_betterColour = (
       <React.Fragment>
@@ -281,8 +241,6 @@ class MapSettings extends Component {
     const settingsDiv = (
       <div className="section settingsDiv">
         <h2>{getLocaleString("MAP-SETTINGS/TITLE")}</h2>
-        {setting_mode}
-        {setting_version}
         {setting_betterColour}
         {setting_dithering}
         {settingGroup_preprocessing}

@@ -26,7 +26,7 @@ class MapartController extends Component {
   state = {
     coloursJSON: null,
     selectedBlocks: {},
-    optionValue_version: Object.values(SupportedVersions)[Object.keys(SupportedVersions).length - 1], // default to the latest version supported
+    optionValue_version: SupportedVersions["1_20"], // default to 1.20
     optionValue_modeNBTOrMapdat: MapModes.SCHEMATIC_NBT.uniqueId,
     optionValue_mapSize_x: 1,
     optionValue_mapSize_y: 1,
@@ -90,10 +90,24 @@ class MapartController extends Component {
       this.state.selectedBlocks[colourSetId] = "-1";
     }
 
-    const cookieMCVersion = CookieManager.touchCookie("mapartcraft_mcversion", Object.values(SupportedVersions)[Object.keys(SupportedVersions).length - 1].MCVersion);
-    const supportedVersionFound = Object.values(SupportedVersions).find((supportedVersion) => supportedVersion.MCVersion === cookieMCVersion);
-    if (supportedVersionFound !== undefined) {
-      this.state.optionValue_version = supportedVersionFound;
+    CookieManager.setCookie("mapartcraft_mcversion", SupportedVersions["1_20"].MCVersion);
+    this.state.optionValue_version = SupportedVersions["1_20"];
+
+    // Set default preset to Carpets
+    const defaultPresetName = "Carpets";
+    const defaultPreset = this.state.presets.find((preset) => preset.name === defaultPresetName);
+    if (defaultPreset !== undefined) {
+      this.state.selectedPresetName = defaultPresetName;
+      // Apply preset blocks
+      for (const [int_colourSetId, presetIndex] of defaultPreset.blocks) {
+        const colourSetId = int_colourSetId.toString();
+        if (colourSetId in this.state.coloursJSON) {
+          const blockIdAndBlock = Object.entries(this.state.coloursJSON[colourSetId].blocks).find(([, block]) => block.presetIndex === presetIndex);
+          if (blockIdAndBlock !== undefined) {
+            this.state.selectedBlocks[colourSetId] = blockIdAndBlock[0];
+          }
+        }
+      }
     }
 
     const URLParams = new URL(window.location).searchParams;
@@ -210,27 +224,6 @@ class MapartController extends Component {
     }
     this.setState({
       selectedBlocks,
-    });
-  };
-
-  onOptionChange_modeNBTOrMapdat = (e) => {
-    const mode = parseInt(e.target.value);
-    this.setState({ optionValue_modeNBTOrMapdat: mode });
-  };
-
-  onOptionChange_version = (e) => {
-    const { coloursJSON } = this.state;
-    const mcVersion = e.target.value;
-    CookieManager.setCookie("mapartcraft_mcversion", mcVersion);
-    const supportedVersionFound = Object.values(SupportedVersions).find((supportedVersion) => supportedVersion.MCVersion === mcVersion);
-    this.setState((currentState) => {
-      let selectedBlocks = { ...currentState.selectedBlocks };
-      for (const [colourSetId, colourSet] of Object.entries(coloursJSON)) {
-        if (selectedBlocks[colourSetId] !== "-1" && !Object.keys(colourSet.blocks[selectedBlocks[colourSetId]].validVersions).includes(mcVersion)) {
-          selectedBlocks[colourSetId] = "-1";
-        }
-      }
-      return { optionValue_version: supportedVersionFound, selectedBlocks };
     });
   };
 
@@ -770,9 +763,8 @@ class MapartController extends Component {
               getLocaleString={getLocaleString}
               coloursJSON={coloursJSON}
               optionValue_version={optionValue_version}
-              onOptionChange_version={this.onOptionChange_version}
+
               optionValue_modeNBTOrMapdat={optionValue_modeNBTOrMapdat}
-              onOptionChange_modeNBTOrMapdat={this.onOptionChange_modeNBTOrMapdat}
 
               optionValue_transparency={optionValue_transparency}
               onOptionChange_transparency={this.onOptionChange_transparency}
@@ -835,15 +827,13 @@ class MapartController extends Component {
               onGetViewOnlineNBT={this.onGetViewOnlineNBT}
             />
           </div>
-          {optionValue_modeNBTOrMapdat === MapModes.SCHEMATIC_NBT.uniqueId ? (
-            <Materials
-              getLocaleString={getLocaleString}
-              coloursJSON={coloursJSON}
-              optionValue_version={optionValue_version}
-              optionValue_supportBlock={optionValue_supportBlock}
-              currentMaterialsData={currentMaterialsData}
-            />
-          ) : null}
+          <Materials
+            getLocaleString={getLocaleString}
+            coloursJSON={coloursJSON}
+            optionValue_version={optionValue_version}
+            optionValue_supportBlock={optionValue_supportBlock}
+            currentMaterialsData={currentMaterialsData}
+          />
         </div>
 
       </div>
