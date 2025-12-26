@@ -313,6 +313,10 @@ class Map_NBT {
         };
         // we expect the support block to be something non-exotic with no properties eg netherrack
       } else {
+        if (!coloursJSON[colourSetId] || !coloursJSON[colourSetId].blocks[currentSelectedBlocks[colourSetId]]) {
+          console.warn(`Missing block data for colourSetId: ${colourSetId}`);
+          return; // Skip this block
+        }
         let blockNBTData = coloursJSON[colourSetId].blocks[currentSelectedBlocks[colourSetId]].validVersions[optionValue_version.MCVersion];
         if (typeof blockNBTData === "string") {
           // this is of the form eg "&1.12.2"
@@ -761,11 +765,24 @@ function setupExactColourCache() {
 
 function exactRGBToColourSetIdAndTone(pixelRGB) {
   const RGBBinary = (pixelRGB[0] << 16) + (pixelRGB[1] << 8) + pixelRGB[2];
-  return exactColourCache.get(RGBBinary);
+  const cached = exactColourCache.get(RGBBinary);
+  if (!cached) {
+    // Fallback to a default if color not found, to prevent crash
+    console.warn(`Color not found in palette: ${pixelRGB}`);
+    return { colourSetId: "NOOBLINE_SCAFFOLD", tone: "normal" };
+  }
+  return cached;
 }
 
 function isSupportBlockMandatoryForColourSetIdAndTone(colourSetIdAndTone) {
-  return coloursJSON[colourSetIdAndTone.colourSetId].blocks[currentSelectedBlocks[colourSetIdAndTone.colourSetId]].supportBlockMandatory;
+  if (!colourSetIdAndTone || colourSetIdAndTone.colourSetId === "NOOBLINE_SCAFFOLD") {
+    return false;
+  }
+  const colourSet = coloursJSON[colourSetIdAndTone.colourSetId];
+  if (!colourSet) return false;
+  const block = colourSet.blocks[currentSelectedBlocks[colourSetIdAndTone.colourSetId]];
+  if (!block) return false;
+  return block.supportBlockMandatory;
 }
 
 function mergeMaps() {

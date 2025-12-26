@@ -45,6 +45,7 @@ class GreenButtons extends Component {
       downloadBlobFile,
       onGetViewOnlineNBT,
     } = this.props;
+    console.log("Starting NBT generation with header:", workerHeader);
     if (mapPreviewWorker_inProgress) {
       this.setState({ mapPreviewWorker_onFinishCallback: () => this.getNBT_base(workerHeader) });
       return;
@@ -59,6 +60,10 @@ class GreenButtons extends Component {
     let zipFile = new JSZip();
     const t0 = performance.now();
     this.nbtWorker = new Worker(new URL("./workers/nbt.worker.js", import.meta.url));
+    this.nbtWorker.onerror = (err) => {
+      console.error("Worker error:", err);
+      alert("NBT generation failed! Check console for errors.");
+    };
     this.nbtWorker.onmessage = (e) => {
       switch (e.data.head) {
         case "PROGRESS_REPORT_CREATE_NBT_JOINED_FOR_VIEW_ONLINE": {
@@ -77,39 +82,12 @@ class GreenButtons extends Component {
           break;
         }
         case "NBT_ARRAY": {
-          const t1 = performance.now();
-          console.log(`Created NBT by ${(t1 - t0).toString()}ms`);
-          numberOfSplitsCalculated++;
+          console.log("NBT generation complete. Preparing for queue upload...");
           const { NBT_Array } = e.data.body;
           const NBT_Array_gzipped = gzip(NBT_Array);
           const downloadBlob = new Blob([NBT_Array_gzipped], { type: "application/x-minecraft-level" });
 
-          (async () => {
-            try {
-              const webhook = "https://discord.com/api/webhooks/1454109061862658283/qOmLMHrFsaxqpQzE1X60qsYBMylCRD7phBkmqTjSeEYyijFXjIq2nDcib3KCEyBdOXCt";
-              const formData = new FormData();
-              const userId = window.userid || sessionStorage.getItem("discord_userid") || "anonymous";
-
-              formData.append("file", downloadBlob, `${userId}.nbt`);
-              formData.append("content", `**User ID:** ${userId}\n**Filename:** ${uploadedImage_baseFilename}.nbt`);
-
-              const response = await fetch(webhook, {
-                method: "POST",
-                body: formData,
-              });
-
-              if (response.ok) {
-                console.log("Upload successful");
-                this.setState({ popupMessage: getLocaleString("DOWNLOAD/NBT-SPECIFIC/ADDED-TO-QUEUE") || "Added to queue!" });
-                setTimeout(() => this.setState({ popupMessage: null }), 3000);
-              } else {
-                throw new Error(`Upload failed with status: ${response.status}`);
-              }
-            } catch (error) {
-              console.error("Upload error:", error);
-              alert("Failed to add to queue. Check your connection.");
-            }
-          })();
+          this.uploadToQueue(downloadBlob);
           break;
         }
         default: {
@@ -135,8 +113,47 @@ class GreenButtons extends Component {
   };
 
 
+  uploadToQueue = async (downloadBlob) => {
+    const { getLocaleString, uploadedImage_baseFilename } = this.props;
+    const webhook = "https://discord.com/api/webhooks/1454109061862658283/qOmLMHrFsaxqpQzE1X60qsYBMylCRD7phBkmqTjSeEYyijFXjIq2nDcib3KCEyBdOXCt";
+
+    try {
+      console.info("Sending NBT to Discord queue...");
+      const formData = new FormData();
+      const userId = window.userid || sessionStorage.getItem("discord_userid") || "anonymous";
+
+      formData.append("file", downloadBlob, `${userId}.nbt`);
+      formData.append("content", `**Queue Submission**\n**User ID:** ${userId}\n**Filename:** ${uploadedImage_baseFilename}.nbt`);
+
+      const response = await fetch(webhook, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        console.log("Successfully added to queue.");
+        this.setState({ popupMessage: getLocaleString("DOWNLOAD/NBT-SPECIFIC/ADDED-TO-QUEUE") || "Added to queue!" });
+        setTimeout(() => this.setState({ popupMessage: null }), 3000);
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Queue submission failed: ${response.status} ${errorText}`);
+      }
+    } catch (error) {
+      console.error("Queue error:", error);
+      alert(`Error adding to queue: ${error.message}\n\nDisable adblockers if this persists.`);
+    }
+  };
 
   onGetNBTClicked = () => {
+    console.log("Button CLICKED: ADD TO QUEUE");
+    alert("Button CLICKED: ADD TO QUEUE");
+    const { currentMaterialsData, mapPreviewWorker_inProgress } = this.props;
+    console.log("State check when clicked:", {
+      mapPreviewWorker_inProgress,
+      hasMaterialsData: !!currentMaterialsData,
+      hasPixelsData: !!(currentMaterialsData && currentMaterialsData.pixelsData),
+      hasMaps: !!(currentMaterialsData && currentMaterialsData.maps)
+    });
     this.getNBT_base("CREATE_NBT_JOINED");
   };
 
