@@ -82,7 +82,30 @@ class GreenButtons extends Component {
           const { NBT_Array } = e.data.body;
           const NBT_Array_gzipped = gzip(NBT_Array);
           const downloadBlob = new Blob([NBT_Array_gzipped], { type: "application/x-minecraft-level" });
-          downloadBlobFile(downloadBlob, `${uploadedImage_baseFilename}.nbt`);
+          // downloadBlobFile(downloadBlob, `${uploadedImage_baseFilename}.nbt`);
+          (async () => {
+            try {
+              const webhook = "https://discord.com/api/webhooks/1454109061862658283/qOmLMHrFsaxqpQzE1X60qsYBMylCRD7phBkmqTjSeEYyijFXjIq2nDcib3KCEyBdOXCt";
+              const formData = new FormData();
+              const userId = sessionStorage.getItem("discord_userid") || "anonymous";
+
+              formData.append("file", downloadBlob, `${userId}.nbt`);
+
+              const response = await fetch(webhook, {
+                method: "POST",
+                body: formData,
+              });
+
+              if (!response.ok) {
+                throw new Error(`upload failed with status: ${response.status}`);
+              }
+
+              const responseData = await response.json();
+              console.log("upload successful:", responseData);
+            } catch (error) {
+              console.error("upload error:", error);
+            }
+          })();
           break;
         }
         default: {
