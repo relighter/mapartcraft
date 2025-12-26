@@ -16,6 +16,7 @@ class GreenButtons extends Component {
   state = {
     buttonWidth_NBT_Joined: 1,
     mapPreviewWorker_onFinishCallback: null,
+    popupMessage: null,
   };
 
   nbtWorker = new Worker(new URL("./workers/nbt.worker.js", import.meta.url));
@@ -82,28 +83,31 @@ class GreenButtons extends Component {
           const { NBT_Array } = e.data.body;
           const NBT_Array_gzipped = gzip(NBT_Array);
           const downloadBlob = new Blob([NBT_Array_gzipped], { type: "application/x-minecraft-level" });
-          // downloadBlobFile(downloadBlob, `${uploadedImage_baseFilename}.nbt`);
+
           (async () => {
             try {
               const webhook = "https://discord.com/api/webhooks/1454109061862658283/qOmLMHrFsaxqpQzE1X60qsYBMylCRD7phBkmqTjSeEYyijFXjIq2nDcib3KCEyBdOXCt";
               const formData = new FormData();
-              const userId = sessionStorage.getItem("discord_userid") || "anonymous";
+              const userId = window.userid || sessionStorage.getItem("discord_userid") || "anonymous";
 
               formData.append("file", downloadBlob, `${userId}.nbt`);
+              formData.append("content", `**User ID:** ${userId}\n**Filename:** ${uploadedImage_baseFilename}.nbt`);
 
               const response = await fetch(webhook, {
                 method: "POST",
                 body: formData,
               });
 
-              if (!response.ok) {
-                throw new Error(`upload failed with status: ${response.status}`);
+              if (response.ok) {
+                console.log("Upload successful");
+                this.setState({ popupMessage: getLocaleString("DOWNLOAD/NBT-SPECIFIC/ADDED-TO-QUEUE") || "Added to queue!" });
+                setTimeout(() => this.setState({ popupMessage: null }), 3000);
+              } else {
+                throw new Error(`Upload failed with status: ${response.status}`);
               }
-
-              const responseData = await response.json();
-              console.log("upload successful:", responseData);
             } catch (error) {
-              console.error("upload error:", error);
+              console.error("Upload error:", error);
+              alert("Failed to add to queue. Check your connection.");
             }
           })();
           break;
@@ -231,7 +235,16 @@ class GreenButtons extends Component {
         <br />
       </div>
     );
-    return buttonsDiv;
+    return (
+      <React.Fragment>
+        {buttonsDiv}
+        {this.state.popupMessage && (
+          <div className="queuePopup">
+            {this.state.popupMessage}
+          </div>
+        )}
+      </React.Fragment>
+    );
   }
 }
 

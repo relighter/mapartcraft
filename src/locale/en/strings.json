@@ -161,6 +161,7 @@
     "NBT-SPECIFIC": {
       "DOWNLOAD": "ADD TO QUEUE",
       "DOWNLOAD-TT": "Add to the queue",
+      "ADDED-TO-QUEUE": "Added to queue!",
       "DOWNLOAD-SPLIT": "DOWNLOAD AS 1x1 SPLIT",
       "DOWNLOAD-SPLIT-TT": "Download the nbt split into 1x1 chunks"
     },

@@ -62,3 +62,26 @@
   background-color: #688e6b;
   height: 100%;
 }
+
+.queuePopup {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #43b581;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-family: "kenpixel_mini_square";
+  font-size: 18px;
+  z-index: 9999;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  animation: fadeInOut 3s forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, 20px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  90% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}
