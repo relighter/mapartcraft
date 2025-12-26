@@ -145,15 +145,8 @@ class GreenButtons extends Component {
   };
 
   onGetNBTClicked = () => {
-    console.log("Button CLICKED: ADD TO QUEUE");
-    alert("Button CLICKED: ADD TO QUEUE");
     const { currentMaterialsData, mapPreviewWorker_inProgress } = this.props;
-    console.log("State check when clicked:", {
-      mapPreviewWorker_inProgress,
-      hasMaterialsData: !!currentMaterialsData,
-      hasPixelsData: !!(currentMaterialsData && currentMaterialsData.pixelsData),
-      hasMaps: !!(currentMaterialsData && currentMaterialsData.maps)
-    });
+    console.log("Generating NBT for queue submission...");
     this.getNBT_base("CREATE_NBT_JOINED");
   };
 

@@ -372,24 +372,6 @@ class Map_NBT {
         currentHeight = 2;
         break;
       }
-      case MapModes.SCHEMATIC_NBT.staircaseModes.CLASSIC.uniqueId:
-      case MapModes.SCHEMATIC_NBT.staircaseModes.VALLEY.uniqueId: {
-        // this doesn't matter
-        // in the classic case each column is later adjusted to have its global minimum at y = 0 so the map has a common base / is as short as possible
-        // in the valley case valleys are pulled down to y = 0
-        currentHeight = 0;
-        break;
-      }
-      case MapModes.SCHEMATIC_NBT.staircaseModes.FULL_DARK.uniqueId: {
-        // staircase descends from noobline southwards
-        currentHeight = 1 + mapColoursLayoutColumn.length;
-        break;
-      }
-      case MapModes.SCHEMATIC_NBT.staircaseModes.FULL_LIGHT.uniqueId: {
-        // staircase ascends from noobline southwards
-        currentHeight = 1;
-        break;
-      }
       default: {
         throw new Error("Unknown staircase mode");
       }
@@ -560,68 +542,8 @@ class Map_NBT {
     });
 
     switch (optionValue_staircasing) {
-      case MapModes.SCHEMATIC_NBT.staircaseModes.VALLEY.uniqueId: {
-        let plateaus = [{ startIndex: 0, endIndex: 0 }];
-        // initial 0 width plateau useful just so we don't have a special case for the first proper plateau later
-        let ascending = false; // weakly ascending
-        let currentPlateauStartIndex = null;
-        let visibleBlocksHeight = physicalColumn[0].pos.value.value[1]; // initialise to noobline height
-        // visible blocks are blocks at the top height in a x-z column, the actual map blocks that give the colours
-
-        for (let i = 0; i < physicalColumn.length; i++) {
-          const physicalBlock = physicalColumn[i];
-          if (this.palette_paletteId_colourSetId[physicalBlock.state.value] === "NOOBLINE_SCAFFOLD") {
-            continue;
-          }
-          if (ascending && physicalBlock.pos.value.value[1] < visibleBlocksHeight) {
-            // dark after ascent; plateau found
-            ascending = false;
-            plateaus.push({
-              startIndex: currentPlateauStartIndex,
-              endIndex: i,
-            });
-          } else if (physicalBlock.pos.value.value[1] > visibleBlocksHeight) {
-            // light
-            ascending = true;
-            currentPlateauStartIndex = i;
-          }
-          visibleBlocksHeight = physicalBlock.pos.value.value[1];
-        }
-
-        plateaus.push({ startIndex: physicalColumn.length, endIndex: physicalColumn.length });
-
-        let nonPlateauPulldownHeights = [Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER];
-        while (plateaus.length !== 1) {
-          let pullDownHeight = Number.MAX_SAFE_INTEGER;
-          for (let i = plateaus[0].endIndex; i < plateaus[1].startIndex; i++) {
-            pullDownHeight = Math.min(physicalColumn[i].pos.value.value[1], pullDownHeight);
-          }
-          for (let i = plateaus[0].endIndex; i < plateaus[1].startIndex; i++) {
-            physicalColumn[i].pos.value.value[1] -= pullDownHeight;
-          }
-          nonPlateauPulldownHeights[1] = pullDownHeight;
-          const plateauPulldownHeight = Math.min(...nonPlateauPulldownHeights);
-          // we pull down a plateau by the minimum of the two values the surrounding non-plateaus were pulled down by
-          for (let i = plateaus[0].startIndex; i < plateaus[0].endIndex; i++) {
-            physicalColumn[i].pos.value.value[1] -= plateauPulldownHeight;
-          }
-          plateaus.shift();
-          nonPlateauPulldownHeights[0] = nonPlateauPulldownHeights[1];
-        }
-        break;
-      }
-      case MapModes.SCHEMATIC_NBT.staircaseModes.CLASSIC.uniqueId: {
-        // make sure the column's global minimum is at y = 0; doing this for every column gives the map a common base.
-        const columnMinimumY = physicalColumn.reduce((a, b) => (a.pos.value.value[1] < b.pos.value.value[1] ? a : b)).pos.value.value[1];
-        physicalColumn.forEach((block) => {
-          block.pos.value.value[1] -= columnMinimumY;
-        });
-        break;
-      }
       case null:
-      case MapModes.SCHEMATIC_NBT.staircaseModes.OFF.uniqueId:
-      case MapModes.SCHEMATIC_NBT.staircaseModes.FULL_DARK.uniqueId:
-      case MapModes.SCHEMATIC_NBT.staircaseModes.FULL_LIGHT.uniqueId: {
+      case MapModes.SCHEMATIC_NBT.staircaseModes.OFF.uniqueId: {
         break;
       }
       default: {
