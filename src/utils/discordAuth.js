@@ -1,5 +1,9 @@
 export const DISCORD_CLIENT_ID = process.env.REACT_APP_DISCORD_CLIENT_ID;
-export const REDIRECT_URI = window.location.origin + window.location.pathname;
+export const REDIRECT_URI = window.location.origin + window.location.pathname + (window.location.pathname.endsWith("/") ? "" : "/");
+
+export function isDiscordConfigured() {
+  return DISCORD_CLIENT_ID && DISCORD_CLIENT_ID !== "1321764359480905758" && DISCORD_CLIENT_ID !== "YOUR_CLIENT_ID";
+}
 
 export const DISCORD_AUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(
   REDIRECT_URI
@@ -12,6 +16,9 @@ export async function fetchDiscordUser(token) {
     },
   });
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
     throw new Error("Failed to fetch Discord user");
   }
   return response.json();
