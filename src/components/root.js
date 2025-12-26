@@ -50,14 +50,13 @@ class Root extends Component {
       return;
     }
 
-    let accessToken = localStorage.getItem("discord_access_token");
+    let accessToken = null;
 
     if (hash.includes("access_token=")) {
       const params = new URLSearchParams(hash.substring(1));
       accessToken = params.get("access_token");
       if (accessToken) {
-        localStorage.setItem("discord_access_token", accessToken);
-        // Clean hash from URL
+        // Clean hash from URL immediately
         window.history.replaceState(null, null, window.location.pathname);
       }
     }
@@ -80,9 +79,8 @@ class Root extends Component {
       this.setState({ isAuthenticating: false });
     } catch (error) {
       console.error("Discord auth failed:", error);
-      localStorage.removeItem("discord_access_token");
       this.setState({
-        authError: error.message === "UNAUTHORIZED" ? "Session expired. Please login again." : "Failed to retrieve user info from Discord.",
+        authError: "Failed to retrieve user info from Discord. Your session may have expired.",
         isAuthenticating: false
       });
     }
@@ -147,6 +145,7 @@ class Root extends Component {
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh", color: "white", background: "#151515", padding: "20px", textAlign: "center" }}>
           <h1 style={{ color: "#ff4444" }}>Authentication Failed</h1>
           <p style={{ maxWidth: "500px", margin: "10px 0 20px" }}>{authError}</p>
+          <p style={{ maxWidth: "500px", margin: "10px 0 20px" }}>If you are using a adblocker, try disabling it.</p>
           <button
             type="button"
             onClick={this.redirectToDiscord}
